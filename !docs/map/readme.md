@@ -11,6 +11,9 @@
 - `russia.orig.svg` - оригинал карты России
 - `belarus.orig.svg` - оригинал карты Белоруссии
 - `kazakhstan.orig.svg` - оригинал карты Казахстана
+- `ukraine.orig.svg` - оригинал карты Украины
+- `georgia.orig.svg` - оригинал карты Грузии
+- `armenia.orig.svg` - оригинал карты Армении
 
 ## Рабочая карта
 
