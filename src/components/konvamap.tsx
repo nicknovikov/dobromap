@@ -5,24 +5,19 @@ import { Group, Layer, Path, Rect, Stage, Text } from "react-konva";
 import jsonRegions from './regions.json';
 import Konva from "konva";
 import { Shape } from "konva/lib/Shape";
+import { MapRegion } from "@/types";
 
 const regions = jsonRegions as [ MapRegion ];
-
-interface MapRegion {
-    id: string,
-    title: string,
-    fill: string,
-    hover: string,
-    path: string
-}
 
 interface KonvaMapProps
   extends Pick<
     React.HTMLAttributes<HTMLDivElement>,
-    "className" | "role" | "style" | "tabIndex" | "title"
-  > {}
+    "className" | "role" | "style" | "tabIndex" | "title" | "onClick"
+  > {
+    onRegionClick: (region: MapRegion) => void
+  }
 
-const KonvaMap: React.FC<KonvaMapProps> = ({ className, ...rest }) => {
+const KonvaMap: React.FC<KonvaMapProps> = ({ className, onRegionClick, ...rest }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const groupRef = useRef(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -137,6 +132,7 @@ const KonvaMap: React.FC<KonvaMapProps> = ({ className, ...rest }) => {
                   fill={ region.fill || "#e5e7eb" }
                   onMouseEnter={ (e) => { onMouseEnter(e.target, region) }}
                   onMouseLeave={ (e) => { onMouseLeave(e.target, region) } }
+                  onClick={ () => onRegionClick(region) }
                 />
               ))}
           </Layer>
