@@ -7,7 +7,7 @@ import Konva from "konva";
 import { Shape } from "konva/lib/Shape";
 import { MapRegion } from "@/types";
 
-const regions = jsonRegions as [ MapRegion ];
+const regions = jsonRegions as Array<MapRegion>;
 
 interface KonvaMapProps
   extends Pick<
@@ -19,8 +19,10 @@ interface KonvaMapProps
 
 const KonvaMap: React.FC<KonvaMapProps> = ({ className, onRegionClick, ...rest }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const groupRef = useRef(null);
+  const regionsLayerRef = useRef<Konva.Layer | null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
+
+  const [ mapPosition, setMapPosition ] = useState({ x: 0, y: 0 });
 
   const [scale, setScale] = useState(1);
 
@@ -28,12 +30,20 @@ const KonvaMap: React.FC<KonvaMapProps> = ({ className, onRegionClick, ...rest }
 
   const tooltipRef = useRef(null);
 
+  /**
+   * Initialaze starting look
+   */
   useLayoutEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !regionsLayerRef.current) return;
 
     const observer = new ResizeObserver(entries => {
       const { width, height } = entries[0].contentRect;
       setSize({ width, height });
+      const regionsLayer = regionsLayerRef.current;
+      if (regionsLayer) {
+        const regionsLayerRect = regionsLayer.getClientRect();
+        setMapPosition({ x: (width - regionsLayerRect.width) / 2, y: (height - regionsLayerRect.height) / 2 });
+      }
     });
 
     observer.observe(containerRef.current);
@@ -92,6 +102,9 @@ const KonvaMap: React.FC<KonvaMapProps> = ({ className, onRegionClick, ...rest }
     }).play();
   }
 
+  /**
+   * Adjust tooltip size to properly wrap text content
+   */
   useLayoutEffect(() => {
     if (!tooltipRef.current) return;
 
@@ -121,10 +134,10 @@ const KonvaMap: React.FC<KonvaMapProps> = ({ className, onRegionClick, ...rest }
   }
 
   return (
-    <div ref={containerRef} style={{ width: '100%', height: '100%' }} onWheel={ handleWheel }>
+    <div ref={containerRef} style={{ width: '100%', height: '100%' }} /* onWheel={ handleWheel } */>
 
-        <Stage width={size.width} height={size.height} draggable scaleX={ scale } scaleY={ scale }>
-          <Layer>
+        <Stage width={size.width} height={size.height} draggable scaleX={ scale } scaleY={ scale } onDr>
+          <Layer ref={regionsLayerRef} x={mapPosition.x} y={mapPosition.y}>
             {regions.map(region => (
                 <Path
                   key={region.id}
@@ -133,6 +146,7 @@ const KonvaMap: React.FC<KonvaMapProps> = ({ className, onRegionClick, ...rest }
                   onMouseEnter={ (e) => { onMouseEnter(e.target, region) }}
                   onMouseLeave={ (e) => { onMouseLeave(e.target, region) } }
                   onClick={ () => onRegionClick(region) }
+                  onPointerClick={ () => onRegionClick(region) }
                 />
               ))}
           </Layer>
